@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylopia AR View</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.js"></script>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: black;
+        height: 100%;
+      }
+
+      /* Landing screen */
+      #overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: radial-gradient(circle at center, #000 60%, #111);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: bgPulse 3s infinite alternate;
+      }
+
+      @keyframes bgPulse {
+        from { box-shadow: inset 0 0 20px #FFD70022; }
+        to { box-shadow: inset 0 0 60px #FFD70055; }
+      }
+
+      h1 {
+        font-family: 'Arial Black', sans-serif;
+        font-size: 2.5em;
+        color: #FFD700;
+        text-shadow: 0 0 15px #FFD700, 0 0 25px #FFD70088;
+        margin-bottom: 30px;
+        animation: glowPulse 2s infinite alternate;
+      }
+
+      @keyframes glowPulse {
+        from { text-shadow: 0 0 10px #FFD70044, 0 0 20px #FFD70022; }
+        to { text-shadow: 0 0 20px #FFD700aa, 0 0 40px #FFD70077; }
+      }
+
+      #startBtn {
+        padding: 14px 40px;
+        font-size: 1.2em;
+        color: #FFD700;
+        background: transparent;
+        border: 2px solid #FFD700;
+        border-radius: 40px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: buttonPulse 2.5s infinite alternate;
+      }
+
+      #startBtn:hover {
+        background: #FFD700;
+        color: black;
+      }
+
+      @keyframes buttonPulse {
+        from { box-shadow: 0 0 10px #FFD70033; }
+        to { box-shadow: 0 0 25px #FFD700aa; }
+      }
+
+      #ar-container {
+        display: none;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Landing overlay -->
+    <div id="overlay">
+      <h1>Stylopia</h1>
+      <button id="startBtn">Tap to View in AR</button>
+    </div>
+
+    <!-- AR Scene -->
+    <a-scene
+      id="ar-container"
+      vr-mode-ui="enabled: false"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      embedded
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
+      
+      <!-- Lighting -->
+      <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+      <a-entity light="type: point; intensity: 1.2; position: 2 4 4"></a-entity>
+
+      <!-- Floating AR card -->
+      <a-entity id="cardGroup" position="0 1.2 -2">
+        <!-- Image plane -->
+        <a-plane id="photo" height="1.4" width="auto"
+                 material="src: url(assets/WhatsApp Image 2025-10-29 at 19.59.55.jpeg); transparent: true;">
+        </a-plane>
+
+        <!-- Glowing 3D frame behind image -->
+        <a-box id="glowFrame" depth="0.05" height="1.45" width="1.05"
+               position="0 0 -0.03"
+               material="color: #FFD700; emissive: #FFD700; opacity: 0.25;">
+        </a-box>
+
+        <!-- Stylopia text below image -->
+        <a-entity position="0 -0.95 0.05"
+                  text="value: Stylopia; align: center; width: 2.5; color: #FFD700; shader: msdf;">
+        </a-entity>
+      </a-entity>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      // Handle start button
+      document.getElementById('startBtn').addEventListener('click', () => {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('ar-container').style.display = 'block';
+      });
+
+      // Floating + rotation + glow animation
+      let card = document.querySelector('#photo');
+      let glow = document.querySelector('#glowFrame');
+      let t = 0;
+      setInterval(() => {
+        t += 0.03;
+        let y = 0.05 * Math.sin(t);
+        card.object3D.position.y = y;
+        glow.object3D.position.y = y;
+        card.object3D.rotation.y += 0.005;
+        let op = 0.25 + 0.15 * Math.sin(t * 2);
+        glow.setAttribute('material', 'opacity:' + op + '; color:#FFD700; emissive:#FFD700; emissiveIntensity:' + (0.6 + 0.4 * Math.sin(t * 2)));
+      }, 16);
+    </script>
+  </body>
+</html>
