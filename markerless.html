@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Stylopia Markerless AR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.js"></script>
+    <style>
+      body, html { margin: 0; overflow: hidden; height: 100%; background: transparent; }
+    </style>
+  </head>
+  <body>
+    <a-scene
+      vr-mode-ui="enabled: false"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      embedded
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
+      
+      <!-- Light setup -->
+      <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+      <a-entity light="type: point; intensity: 1.2; position: 2 4 4"></a-entity>
+
+      <!-- Stylopia 3D card -->
+      <a-entity position="0 1.2 -2" rotation="0 0 0">
+        <!-- The 3D card -->
+        <a-box id="card" depth="0.05" height="1.4" width="1.0"
+               material="src: url(assets/WhatsApp Image 2025-10-29 at 19.59.55.jpeg); transparent: true;">
+        </a-box>
+
+        <!-- Glowing frame -->
+        <a-box id="glow" depth="0.055" height="1.45" width="1.05" material="color: #FFD700; emissive: #FFD700; opacity: 0.3;"></a-box>
+
+        <!-- Stylopia text -->
+        <a-entity position="0 -0.9 0.03"
+                  text="value: Stylopia; align: center; width: 2.5; color: #ffffff; shader: msdf;">
+        </a-entity>
+      </a-entity>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      // Add subtle floating + rotation + glow pulse animation
+      var card = document.querySelector('#card');
+      var glow = document.querySelector('#glow');
+      var t = 0;
+      setInterval(function() {
+        t += 0.03;
+        var y = 0.05 * Math.sin(t);
+        card.object3D.position.y = y;
+        glow.object3D.position.y = y;
+        card.object3D.rotation.y += 0.005;
+        var op = 0.3 + 0.2 * Math.sin(t * 2);
+        glow.setAttribute('material', 'opacity:' + op + '; color:#FFD700; emissive:#FFD700; emissiveIntensity:' + (0.5 + 0.5 * Math.sin(t * 2)));
+      }, 16);
+    </script>
+  </body>
+</html>
