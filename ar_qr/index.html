@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Stylopia AR Card</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.7/aframe/build/aframe-ar.js"></script>
+    <style>body,html{margin:0;height:100%;background:transparent;}</style>
+  </head>
+  <body>
+    <!-- Open this page on mobile with camera permission. Point the camera at the Hiro marker (example below). -->
+    <!-- Hiro marker (print or display on another device): https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/HIRO.png -->
+    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
+      <a-marker preset="hiro">
+        <!-- 3D card: a thin box with image texture on the front face -->
+        <a-entity rotation="-90 0 0">
+          <a-box id="card" depth="0.02" height="1.6" width="1.0" position="0 0 0"
+                 material="src: url(assets/WhatsApp Image 2025-10-29 at 19.59.55.jpeg); transparent: true;">
+          </a-box>
+          <!-- glowing frame (slightly larger box with emissive material) -->
+          <a-box id="glow" depth="0.021" height="1.62" width="1.02" position="0 0 -0.011"
+                 material="color:#ffffff; opacity:0.0;">
+          </a-box>
+          <!-- Stylopia text -->
+          <a-entity position="0 -0.95 0.03" rotation="0 0 0"
+                    text="value: Stylopia; align: center; width: 2; color: #ffffff; shader:msdf;">
+          </a-entity>
+        </a-entity>
+      </a-marker>
+      <a-entity camera></a-entity>
+      <a-sky color="#000000" material="opacity:0"></a-sky>
+    </a-scene>
+
+    <script>
+      // Animation: slow rotation + gentle hover + glow pulsing
+      var card = document.querySelector('#card');
+      var glow = document.querySelector('#glow');
+      var t = 0;
+      setInterval(function(){
+        t += 0.02;
+        // hover (y offset)
+        var y = 0.05 * Math.sin(t*1.2);
+        card.object3D.position.y = y;
+        glow.object3D.position.y = y;
+        // rotation
+        card.object3D.rotation.y += 0.005;
+        // glow pulse
+        var op = 0.25 + 0.2 * Math.sin(t*2.0);
+        glow.setAttribute('material', 'color: #FFD700; opacity:' + op + '; emissive: #FFD700; emissiveIntensity:' + (0.5+0.5*Math.sin(t*2.0)));
+      }, 16);
+    </script>
+  </body>
+</html>
