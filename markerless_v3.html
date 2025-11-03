@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stylopia AR View</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.js"></script>
+    <style>
+      body, html { margin: 0; padding: 0; overflow: hidden; background: black; height: 100%; }
+
+      #overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(circle at center, #000 60%, #111);
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        z-index: 9999; animation: bgPulse 3s infinite alternate;
+      }
+
+      @keyframes bgPulse {
+        from { box-shadow: inset 0 0 20px #FFD70022; }
+        to { box-shadow: inset 0 0 60px #FFD70055; }
+      }
+
+      h1 {
+        font-family: 'Arial Black', sans-serif;
+        font-size: 2.5em;
+        color: #FFD700;
+        text-shadow: 0 0 15px #FFD700, 0 0 25px #FFD70088;
+        margin-bottom: 30px;
+        animation: glowPulse 2s infinite alternate;
+      }
+
+      @keyframes glowPulse {
+        from { text-shadow: 0 0 10px #FFD70044, 0 0 20px #FFD70022; }
+        to { text-shadow: 0 0 20px #FFD700aa, 0 0 40px #FFD70077; }
+      }
+
+      #startBtn {
+        padding: 14px 40px;
+        font-size: 1.2em;
+        color: #FFD700;
+        background: transparent;
+        border: 2px solid #FFD700;
+        border-radius: 40px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: buttonPulse 2.5s infinite alternate;
+      }
+
+      #startBtn:hover {
+        background: #FFD700;
+        color: black;
+      }
+
+      @keyframes buttonPulse {
+        from { box-shadow: 0 0 10px #FFD70033; }
+        to { box-shadow: 0 0 25px #FFD700aa; }
+      }
+
+      #ar-container { display: none; width: 100%; height: 100%; }
+    </style>
+  </head>
+
+  <body>
+    <div id="overlay">
+      <h1>Stylopia</h1>
+      <button id="startBtn">Tap to View in AR</button>
+      <p style="color:#aaa; margin-top:20px; font-size:0.9em;">Point your camera at the ground and the card will appear automatically.</p>
+    </div>
+
+    <a-scene id="ar-container"
+      vr-mode-ui="enabled: false"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      embedded
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
+      
+      <!-- Lighting -->
+      <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+      <a-entity light="type: point; intensity: 1.2; position: 2 4 4"></a-entity>
+
+      <!-- Floating AR card group -->
+      <a-entity id="cardGroup" position="0 0 -1" rotation="0 0 0">
+        <!-- Plane showing the full image. Width and height set to preserve aspect visually. -->
+        <a-plane id="photo"
+                 position="0 0 0"
+                 width="1.2" height="1.6"
+                 material="src: url(assets/stylopia.jpeg); transparent: true; side: double; depthTest: true;">
+        </a-plane>
+
+        <!-- Glowing frame behind the plane -->
+        <a-box id="glowFrame" depth="0.06" height="1.66" width="1.26"
+               position="0 0 -0.03"
+               material="color: #FFD700; emissive: #FFD700; opacity: 0.25;">
+        </a-box>
+
+        <!-- Stylopia text below image -->
+        <a-entity position="0 -0.95 0.05"
+                  text="value: Stylopia; align: center; width: 2.5; color: #FFD700; shader: msdf;">
+        </a-entity>
+      </a-entity>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      // Start button: show AR scene and request camera
+      document.getElementById('startBtn').addEventListener('click', async () => {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('ar-container').style.display = 'block';
+
+        // Try to get camera permission immediately (some browsers require user gesture)
+        try {
+          await navigator.mediaDevices.getUserMedia({ video: true });
+        } catch (e) {
+          console.warn('Camera permission denied or not available', e);
+        }
+      });
+
+      // Simple auto-placement: move cardGroup slightly in front and at camera height
+      // and animate float + rotation
+      const cardGroup = document.querySelector('#cardGroup');
+      const photo = document.querySelector('#photo');
+      const glow = document.querySelector('#glowFrame');
+      let t = 0;
+      setInterval(() => {
+        t += 0.03;
+        const y = 0.1 * Math.sin(t);
+        cardGroup.object3D.position.y = y + 0.7;
+        cardGroup.object3D.position.z = -1.2;
+        cardGroup.object3D.rotation.y += 0.0045;
+        const op = 0.25 + 0.15 * Math.sin(t * 2);
+        glow.setAttribute('material', 'opacity:' + op + '; emissive: #FFD700; emissiveIntensity:' + (0.6 + 0.4 * Math.sin(t * 2)));
+      }, 16);
+    </script>
+  </body>
+</html>
